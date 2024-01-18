@@ -107,8 +107,8 @@ button:
 # https://esphome.io/components/wifi.html
 wifi:
 
-  ssid: initial_ap
-  password: asdfasdfasdfasdf
+  ssid: P-Pods
+  password: andyandycat
 
   # using fast_connect as default since it is required for hidden networks.
   fast_connect: true
@@ -245,6 +245,8 @@ select:
       # HomeAssistant, you can still change the effect with a service call.
       - "None"
       - "WLED / DDP"
+      - "Candle Breezy"
+      - "Candle Calm"
     initial_option: "None"
     restore_value: true
     icon: mdi:string-lights
@@ -252,7 +254,6 @@ select:
       - lambda: |-
           // Always clear any effect we may have running.
           auto call = id(kauf_light).make_call();
-          call.set_transition_length(0); // For the code path in light_call.cpp
           call.set_effect(0);
           call.perform();
 
@@ -263,7 +264,6 @@ select:
           } else {
             id(kauf_light)->set_use_wled(false);
             auto call = id(kauf_light).make_call();
-            call.set_transition_length(0);
             call.set_effect(x);
             call.perform();
           }
