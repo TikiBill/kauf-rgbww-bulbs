@@ -44,6 +44,7 @@ from .types import (
     AddressableLightRef,
     AddressableLambdaLightEffect,
     FlickerLightEffect,
+    CandleLightEffect,
     AddressableRainbowLightEffect,
     AddressableColorWipeEffect,
     AddressableColorWipeEffectColor,
@@ -78,6 +79,10 @@ CONF_ADDRESSABLE_FLICKER = "addressable_flicker"
 CONF_AUTOMATION = "automation"
 CONF_ON_LENGTH = "on_length"
 CONF_OFF_LENGTH = "off_length"
+CONF_FLICKER_DEPTH = "flicker_depth"
+CONF_FLICKER_PERCENT = "flicker_percent"
+CONF_FLICKER_SPEED = "flicker_speed"
+CONF_FLICKER_SPEED_JITTER = "flicker_speed_jitter"
 
 BINARY_EFFECTS = []
 MONOCHROMATIC_EFFECTS = []
@@ -330,6 +335,26 @@ async def flicker_effect_to_code(config, effect_id):
     cg.add(var.set_intensity(config[CONF_INTENSITY]))
     return var
 
+@register_monochromatic_effect(
+    "candle",
+    CandleLightEffect,
+    "Candle",
+    {
+        cv.Optional(CONF_INTENSITY, default=0.100): cv.percentage,
+        cv.Optional(CONF_FLICKER_DEPTH, default=0.050): cv.percentage,
+        cv.Optional(CONF_FLICKER_PERCENT, default=0.80): cv.percentage,
+        cv.Optional(CONF_FLICKER_SPEED, default=150): cv.uint32_t,
+        cv.Optional(CONF_FLICKER_SPEED_JITTER, default=20): cv.uint32_t,
+    },
+)
+async def candle_effect_to_code(config, effect_id):
+    var = cg.new_Pvariable(effect_id, config[CONF_NAME])
+    cg.add(var.set_intensity(config[CONF_INTENSITY]))
+    cg.add(var.set_flicker_depth(config[CONF_FLICKER_DEPTH]))
+    cg.add(var.set_flicker_percent(config[CONF_FLICKER_PERCENT]))
+    cg.add(var.set_flicker_speed(config[CONF_FLICKER_SPEED]))
+    cg.add(var.set_flicker_speed_jitter(config[CONF_FLICKER_SPEED_JITTER]))
+    return var
 
 @register_addressable_effect(
     "addressable_lambda",

@@ -163,6 +163,30 @@ light:
       - strobe:
       - pulse:
       - random:
+      - candle:
+          name: "Candle - Calm Room"
+          intensity: 10%
+          flicker_depth: 05%
+          flicker_percent: 30%
+
+      - candle:
+          name: "Candle - Calm"
+          intensity: 10%
+
+      - candle:
+          name: "Candle - Breezy"
+          intensity: 15%
+
+      - candle:
+          name: "Candle Test Breezy 250ms"
+          intensity: 15%
+          flicker_speed: 250
+
+      - candle:
+          name: "Candle Test Breezy 350ms"
+          intensity: 15%
+          flicker_speed: 350
+
       - lambda:
           name: "Candle Breezy"
           update_interval: 10ms
