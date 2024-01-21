@@ -63,10 +63,8 @@ external_components:
       ref: v2023.12.20
     refresh: never
   - source:
-      type: git
-      url: https://github.com/KaufHA/kauf-rgbww-bulbs
-    refresh: always
-
+      type: local
+      path: ./components
 
 # https://esphome.io/guides/automations.html#global-variables
 globals:
