@@ -174,16 +174,26 @@ light:
           intensity: 10%
 
       - candle:
-          name: "Candle - Breezy"
+          name: "Candle Test Breezy 100ms"
           intensity: 15%
+          flicker_depth: 10%
+          flicker_speed: 100
+
+      - candle:
+          name: "Candle - Breezy 150ms"
+          intensity: 15%
+          flicker_depth: 10%
+          flicker_speed: 150
+
+      - candle:
+          name: "Candle Test Breezy 200ms"
+          intensity: 15%
+          flicker_depth: 10%
+          flicker_speed: 200
 
       - candle:
           name: "Candle Test Breezy 250ms"
           intensity: 15%
+          flicker_depth: 10%
           flicker_speed: 250
-
-      - candle:
-          name: "Candle Test Breezy 350ms"
-          intensity: 15%
-          flicker_speed: 350
 
