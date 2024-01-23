@@ -292,20 +292,20 @@ class CandleLightEffect : public LightEffect {
         float dim_depth = 1.0f;
         // Floating point multiplication is faster than division.
         if (r <= this->flicker_percent_ * 0.10f) {
-          dim_depth = 3.0f;
+          dim_depth = 2.0f;
           state = 3;
         } else if (r <= this->flicker_percent_ * 0.5f) {
-          dim_depth = 2.0f;
+          dim_depth = 1.0f;
           state = 2;
         } else if (r <= this->flicker_percent_) {
-          dim_depth = 1.0f;
+          dim_depth = 0.0f;
           state = 1;
         } else {
           dim_depth = 0.0f;
           state = 0;
         }
 
-        if(dim_depth <= 0.0f){
+        if(state == 0){
           flickerBright = this->initial_brightness_;
           flickerDim = this->initial_brightness_;
         } else {
@@ -320,9 +320,9 @@ class CandleLightEffect : public LightEffect {
         if (state == 3) {
           flickersLeft = 1;
         } else if ( r <= 0.2 ) {
-          flickersLeft = 8; // 4 bright 4 dim
+          flickersLeft = 10; // 4 bright 4 dim
         } else if ( r <= 0.6 ) {
-          flickersLeft = 6;
+          flickersLeft = 8;
         } else if ( r <= 0.7 ) {
           flickersLeft = 4;
         } else {
@@ -381,8 +381,8 @@ class CandleLightEffect : public LightEffect {
   float intensity_ = 0.10f;
   float flicker_percent_ = 0.8f;
   float flicker_depth_ = 0.05f;
-  int speed_ms_ = 150;
-  int speed_jitter_ms_ = 20;
+  int speed_ms_ = 100;
+  int speed_jitter_ms_ = 10;
 
   // State
   bool need_initial_brightness_;
