@@ -83,6 +83,7 @@ CONF_FLICKER_DEPTH = "flicker_depth"
 CONF_FLICKER_PERCENT = "flicker_percent"
 CONF_FLICKER_SPEED = "flicker_speed"
 CONF_FLICKER_SPEED_JITTER = "flicker_speed_jitter"
+CONF_SET_RGB_COLOR="rgb_color"
 
 BINARY_EFFECTS = []
 MONOCHROMATIC_EFFECTS = []
@@ -343,8 +344,11 @@ async def flicker_effect_to_code(config, effect_id):
         cv.Optional(CONF_INTENSITY, default=0.100): cv.percentage,
         cv.Optional(CONF_FLICKER_DEPTH, default=0.050): cv.percentage,
         cv.Optional(CONF_FLICKER_PERCENT, default=0.80): cv.percentage,
-        cv.Optional(CONF_FLICKER_SPEED, default=150): cv.uint32_t,
-        cv.Optional(CONF_FLICKER_SPEED_JITTER, default=20): cv.uint32_t,
+        cv.Optional(CONF_FLICKER_SPEED, default=75): cv.uint32_t,
+        cv.Optional(CONF_FLICKER_SPEED_JITTER, default=10): cv.uint32_t,
+        cv.Optional(CONF_RED, default=0.0):  cv.percentage,
+        cv.Optional(CONF_GREEN, default=0.0): cv.percentage,
+        cv.Optional(CONF_BLUE, default=0.0): cv.percentage,
     },
 )
 async def candle_effect_to_code(config, effect_id):
@@ -354,6 +358,9 @@ async def candle_effect_to_code(config, effect_id):
     cg.add(var.set_flicker_percent(config[CONF_FLICKER_PERCENT]))
     cg.add(var.set_flicker_speed(config[CONF_FLICKER_SPEED]))
     cg.add(var.set_flicker_speed_jitter(config[CONF_FLICKER_SPEED_JITTER]))
+    cg.add(var.set_red(config[CONF_RED]))
+    cg.add(var.set_green(config[CONF_GREEN]))
+    cg.add(var.set_blue(config[CONF_BLUE]))
     return var
 
 @register_addressable_effect(
