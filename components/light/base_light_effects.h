@@ -340,7 +340,7 @@ class CandleLightEffect : public LightEffect {
         if (this->flicker_state_ == 3) {
           this->flickers_left_ = 1;
         } else if ( r <= 0.2 ) {
-          this->flickers_left_ = 10; // 4 bright 4 dim
+          this->flickers_left_ = 10; // 5 bright 5 dim
         } else if ( r <= 0.6 ) {
           this->flickers_left_ = 8;
         } else if ( r <= 0.7 ) {
