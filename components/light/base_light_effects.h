@@ -247,8 +247,7 @@ class CandleLightEffect : public LightEffect {
 
   void apply() override {
 
-      auto light = this->state_;
-      if (light->transformer_active) {
+      if (this->state_->transformer_active) {
         // Something is already running.
         return;
       }
