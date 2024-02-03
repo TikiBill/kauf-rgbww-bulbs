@@ -1,0 +1,90 @@
+substitutions:
+  project_ver_let: v
+  default_power_on_state: "Always On - Last Value"
+  wifi_ap_timeout: 15s    # default to 15 second timeout for update bin file
+
+
+packages:
+  kauf_bulb_base: !include kauf-bulb.yaml
+
+
+dashboard_import:
+  package_import_url: github://KaufHA/kauf-rgbww-bulbs/kauf-bulb.yaml
+
+
+esphome:
+  name_add_mac_suffix: true
+
+
+wifi:
+  # add forced hash which isn't needed for dashboard import.
+  # Allows saving wifi credentials across update.
+  forced_hash: 2048874009
+
+external_components:
+  - source:
+      type: local
+      path: ./components
+
+
+light:
+  - id: !extend kauf_light
+    #https://esphome.io/components/light/#light-effects
+    effects:
+      - flicker:
+          alpha: 94%
+          intensity: 12%
+      - strobe:
+      - pulse:
+      - random:
+      - candle:
+          name: "Candle - Calm Room"
+          intensity: 10%
+          flicker_depth: 05%
+          flicker_percent: 50%
+          flicker_speed: 100
+          red: 100%
+          green: 50%
+
+      - candle:
+          name: "Candle - Calm"
+          intensity: 10%
+
+      - candle:
+          name: "Candle Test Breezy 50ms"
+          intensity: 15%
+          flicker_depth: 10%
+          flicker_speed: 50
+
+      - candle:
+          name: "Candle Test Breezy 75ms"
+          intensity: 15%
+          flicker_depth: 10%
+          flicker_speed: 75
+          red: 100%
+          green: 50%
+
+      - candle:
+          name: "Candle Test Breezy 100ms"
+          intensity: 15%
+          flicker_depth: 10%
+          flicker_speed: 100
+
+      - candle:
+          name: "Candle - Breezy 150ms"
+          intensity: 15%
+          flicker_depth: 10%
+          flicker_speed: 150
+
+      - candle:
+          name: "Candle Test Breezy 200ms"
+          intensity: 15%
+          flicker_depth: 10%
+          flicker_speed: 200
+
+      - candle:
+          name: "Candle Test Breezy 250ms"
+          intensity: 15%
+          flicker_depth: 10%
+          flicker_speed: 250
+
