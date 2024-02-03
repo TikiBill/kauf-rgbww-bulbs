@@ -38,18 +38,13 @@ light:
       - pulse:
       - random:
       - candle:
-          name: "Tealight - Calm Room"
+          name: "Candle - Calm Room"
           intensity: 10%
           flicker_depth: 05%
           flicker_percent: 50%
           flicker_speed: 100
-
-      - candle:
-          name: "Tealight - Breezy"
-          intensity: 10%
-          flicker_depth: 05%
-          flicker_percent: 80%
-          flicker_speed: 75
+          red: 100%
+          green: 50%
 
       - candle:
           name: "Candle - Calm"
