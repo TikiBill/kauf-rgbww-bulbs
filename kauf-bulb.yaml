@@ -63,9 +63,8 @@ external_components:
       ref: v2023.12.20
     refresh: never
   - source:
-      type: git
-      url: https://github.com/KaufHA/kauf-rgbww-bulbs
-    refresh: always
+      type: local
+      path: ./components
 
 
 # https://esphome.io/guides/automations.html#global-variables
@@ -283,7 +282,10 @@ select:
     options:
       - "Restore Power Off State"
       - "Always On - Last Value"
+      - "Always On - Bulb Default"
+      - "Always On - Warm White"
       - "Always On - Bright White"
+      - "Always On - Cool White"
       - "Always Off"
       - "YAML Configured ($light_restore_mode)"
     # defaulting to always on is nice so you know new bulbs are working
@@ -296,8 +298,14 @@ select:
             kauf_light->set_restore_mode(LIGHT_RESTORE_DEFAULT_OFF);
           else if ( x == "Always On - Last Value")
             kauf_light->set_restore_mode(LIGHT_RESTORE_AND_ON);
-          else if ( x == "Always On - Bright White")
+          else if ( x == "Always On - Bulb Default")
             kauf_light->set_restore_mode(LIGHT_ALWAYS_ON);
+          else if ( x == "Always On - Warm White")
+            kauf_light->set_restore_mode(LIGHT_ALWAYS_ON_WARM_WHITE);
+          else if ( x == "Always On - Bright White")
+            kauf_light->set_restore_mode(LIGHT_ALWAYS_ON_BRIGHT_WHITE);
+          else if ( x == "Always On - Cool White")
+            kauf_light->set_restore_mode(LIGHT_ALWAYS_ON_COOL_WHITE);
           else if ( x == "Always Off")
             kauf_light->set_restore_mode(LIGHT_RESTORE_AND_OFF);
           else
