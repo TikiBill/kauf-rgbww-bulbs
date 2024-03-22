@@ -15,6 +15,9 @@ dashboard_import:
 esphome:
   name_add_mac_suffix: true
 
+  on_boot:
+    then:
+      - script.execute: script_quick_boot_custom
 
 wifi:
   # add forced hash which isn't needed for dashboard import.
@@ -88,3 +91,87 @@ light:
           flicker_depth: 10%
           flicker_speed: 250
 
+script:
+    # increment global_quick_boot_count if bulb stays on less than 10 seconds or never connects to wifi
+    # reset wifi credentials if the counter gets to 5
+  - id: script_quick_boot_custom
+    then:
+
+      # if quick boot count is 5, overwrite wifi credentials to force AP
+      - if:
+          condition:
+            lambda: return ( id(global_quick_boot_count) >= 5 );
+          then:
+            # wait until attempt to load credentials has been made, that way we know the new ones can be saved properly.
+            - wait_until:
+                lambda: return ( wifi_wificomponent->tried_loading_creds );
+
+            - lambda: |-
+                ESP_LOGD("kauf-bulb.yaml", "quick boot count variable is now 5, overwriting credentials and rebooting");
+
+                // overwrite wifi credentials
+                wifi::global_wifi_component->save_wifi_sta("initial_ap","asdfasdfasdfasdf");
+
+                // reset counter and immediately save
+                id(global_quick_boot_count) = 0;
+                global_quick_boot_count->loop();
+                global_preferences->sync();
+
+                // turn on red light
+                auto call = id(kauf_light).turn_on();
+                call.set_transition_length(500);
+                call.set_brightness(0.6);
+                call.set_rgb(1.0, 0.0, 0.0);
+                call.set_save(false);
+                call.perform();
+
+              # short delay
+            - delay: 5s
+
+              # reboot
+            - button.press: restart_button
+
+
+      # increment quick boot counter so it will stay incremented if device reboots
+      - lambda: |-
+          ESP_LOGD("kauf-bulb.yaml", "quick boot count variable is now %d.  Need 5 to overwrite credentials", id(global_quick_boot_count));
+          id(global_quick_boot_count) += 1;
+          global_quick_boot_count->loop();
+          global_preferences->sync();
+
+      # if quick boot count gets over 1 (don't flash on first occurance in case it's an accident), flash light to indicate we are in process
+      - if:
+          condition:
+            lambda: return ( id(global_quick_boot_count) > 2 );
+          then:
+            - lambda: |-
+                auto call = id(kauf_light).turn_on();
+                call.set_transition_length(500);
+                call.set_brightness(0.5);
+                call.set_rgb(1.0, 1.0, 0.0);
+                call.set_save(false);
+                call.perform();
+            - delay: 4s
+            - light.turn_off: kauf_light
+
+      - lambda: |-
+          auto call = id(kauf_light).turn_on();
+          call.set_transition_length(500);
+          call.set_brightness(0.5);
+          call.set_rgb(1.0, 0.5, 0.0);
+          call.set_save(false);
+          call.perform();
+
+      # wait 10 seconds
+      - delay: 10s
+      - lambda: ESP_LOGD("kauf-bulb.yaml", "quick boot script, 10 seconds up");
+
+      # wait until wifi is connected
+      - wait_until: wifi.connected
+      - lambda: ESP_LOGD("kauf-bulb.yaml", "quick boot script, wifi connected");
+
+      # any time boot is greater than 10 seconds and also connects to wifi, reset quick boot count to 0
+      - lambda: |-
+          id(global_quick_boot_count) = 0;
+          global_quick_boot_count->loop();
+          global_preferences->sync();
