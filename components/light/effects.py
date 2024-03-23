@@ -79,10 +79,10 @@ CONF_ADDRESSABLE_FLICKER = "addressable_flicker"
 CONF_AUTOMATION = "automation"
 CONF_ON_LENGTH = "on_length"
 CONF_OFF_LENGTH = "off_length"
-CONF_FLICKER_DEPTH = "flicker_depth"
-CONF_FLICKER_PERCENT = "flicker_percent"
-CONF_FLICKER_SPEED = "flicker_speed"
-CONF_FLICKER_SPEED_JITTER = "flicker_speed_jitter"
+CONF_FLICKER_INTENSITY = "flicker_intensity"
+CONF_FLICKER_PROBABILITY = "flicker_probability"
+CONF_FLICKER_TRANSITION_LENGTH = "flicker_transition_length"
+CONF_FLICKER_TRANSITION_LENGTH_JITTER = "flicker_transition_length_jitter"
 CONF_SET_RGB_COLOR="rgb_color"
 
 BINARY_EFFECTS = []
@@ -341,11 +341,11 @@ async def flicker_effect_to_code(config, effect_id):
     CandleLightEffect,
     "Candle",
     {
-        cv.Optional(CONF_INTENSITY, default=0.100): cv.percentage,
-        cv.Optional(CONF_FLICKER_DEPTH, default=0.050): cv.percentage,
-        cv.Optional(CONF_FLICKER_PERCENT, default=0.80): cv.percentage,
-        cv.Optional(CONF_FLICKER_SPEED, default=75): cv.uint32_t,
-        cv.Optional(CONF_FLICKER_SPEED_JITTER, default=10): cv.uint32_t,
+        cv.Optional(CONF_INTENSITY, default=0.300): cv.percentage,
+        cv.Optional(CONF_FLICKER_INTENSITY, default=0.500): cv.percentage,
+        cv.Optional(CONF_FLICKER_PROBABILITY, default=0.80): cv.percentage,
+        cv.Optional(CONF_FLICKER_TRANSITION_LENGTH, default=100): cv.uint32_t,
+        cv.Optional(CONF_FLICKER_TRANSITION_LENGTH_JITTER, default=10): cv.uint32_t,
         cv.Optional(CONF_RED, default=0.0):  cv.percentage,
         cv.Optional(CONF_GREEN, default=0.0): cv.percentage,
         cv.Optional(CONF_BLUE, default=0.0): cv.percentage,
@@ -354,10 +354,10 @@ async def flicker_effect_to_code(config, effect_id):
 async def candle_effect_to_code(config, effect_id):
     var = cg.new_Pvariable(effect_id, config[CONF_NAME])
     cg.add(var.set_intensity(config[CONF_INTENSITY]))
-    cg.add(var.set_flicker_depth(config[CONF_FLICKER_DEPTH]))
-    cg.add(var.set_flicker_percent(config[CONF_FLICKER_PERCENT]))
-    cg.add(var.set_flicker_speed(config[CONF_FLICKER_SPEED]))
-    cg.add(var.set_flicker_speed_jitter(config[CONF_FLICKER_SPEED_JITTER]))
+    cg.add(var.set_flicker_intensity(config[CONF_FLICKER_INTENSITY]))
+    cg.add(var.set_flicker_probability(config[CONF_FLICKER_PROBABILITY]))
+    cg.add(var.set_flicker_transition_length(config[CONF_FLICKER_TRANSITION_LENGTH]))
+    cg.add(var.set_flicker_transition_length_jitter(config[CONF_FLICKER_TRANSITION_LENGTH_JITTER]))
     cg.add(var.set_red(config[CONF_RED]))
     cg.add(var.set_green(config[CONF_GREEN]))
     cg.add(var.set_blue(config[CONF_BLUE]))

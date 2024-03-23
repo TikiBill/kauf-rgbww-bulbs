@@ -40,16 +40,16 @@ light:
       - candle:
           name: "Tealight - Calm Room"
           intensity: 10%
-          flicker_depth: 05%
-          flicker_percent: 50%
-          flicker_speed: 100
+          flicker_intensity: 05%
+          flicker_probability: 50%
+          flicker_transition_length: 100
 
       - candle:
           name: "Tealight - Breezy"
           intensity: 10%
-          flicker_depth: 05%
-          flicker_percent: 80%
-          flicker_speed: 75
+          flicker_intensity: 05%
+          flicker_probability: 80%
+          flicker_transition_length: 75
 
       - candle:
           name: "Candle - Calm"
@@ -58,38 +58,38 @@ light:
       - candle:
           name: "Candle Test Breezy 50ms"
           intensity: 15%
-          flicker_depth: 10%
-          flicker_speed: 50
+          flicker_intensity: 10%
+          flicker_transition_length: 50
 
       - candle:
           name: "Candle Test Breezy 75ms"
           intensity: 15%
-          flicker_depth: 10%
-          flicker_speed: 75
+          flicker_intensity: 10%
+          flicker_transition_length: 75
           red: 100%
           green: 50%
 
       - candle:
           name: "Candle Test Breezy 100ms"
           intensity: 15%
-          flicker_depth: 10%
-          flicker_speed: 100
+          flicker_intensity: 10%
+          flicker_transition_length: 100
 
       - candle:
           name: "Candle - Breezy 150ms"
           intensity: 15%
-          flicker_depth: 10%
-          flicker_speed: 150
+          flicker_intensity: 10%
+          flicker_transition_length: 150
 
       - candle:
           name: "Candle Test Breezy 200ms"
           intensity: 15%
-          flicker_depth: 10%
-          flicker_speed: 200
+          flicker_intensity: 10%
+          flicker_transition_length: 200
 
       - candle:
           name: "Candle Test Breezy 250ms"
           intensity: 15%
-          flicker_depth: 10%
-          flicker_speed: 250
+          flicker_intensity: 10%
+          flicker_transition_length: 250
 

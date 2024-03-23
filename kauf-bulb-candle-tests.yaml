@@ -40,56 +40,101 @@ light:
       - strobe:
       - pulse:
       - random:
+
+      # Candle with all options specified at their default values besides
+      # the RGB values which are normally not set.
+      - candle:
+          name: "Candle - All Options Documented"
+
+          # The maximum drop in intensity from the starting brightness, as a percent.
+          # That is, if you start the effect with a brightness of 80% and specify
+          # 30% here, then the minimum intensity will be 60.8% (0.8 - (0.8 * 0.3)).
+          # Statistically the minimum brightens is only triggered rarely.
+          #
+          # Assuming you are starting at 100% brightness:
+          #   30% is good for a lantern accent light.
+          #   20% is good for overhead lighting with multiple bulbs running the effect.
+          intensity: 30%
+
+          # The bright-dark flicker swing relative to the calculated step. Normally
+          # 50% is a good value as that is the half way point between each level
+          # of the flicker.. 0% will be no sub-flicker and 200% would be wild.
+          flicker_intensity: 50%
+
+          # How often the light will be flickering.
+          flicker_probability: 80%
+
+          # The transition length of the bright-to-dark or dark-to-light flicker.
+          flicker_transition_length: 100
+
+          # Amount of time added randomly to the flicker_transition_length to model
+          # that fact that the candle is not an ideal oscillator.
+          flicker_transition_length_jitter: 10
+
+          # Optional starting RGB values. Otherwise the color and intensity
+          # will be kept from when the flicker started. When any one is non-zero,
+          # then the custom color is used with a default of 0 for not specified
+          # and the intensity is set to 100%.
+          red: 100%
+          green: 50%
+          blue: 0%
+
       - candle:
           name: "Candle - Calm Room"
-          intensity: 10%
-          flicker_depth: 05%
-          flicker_percent: 50%
-          flicker_speed: 100
+          intensity: 30%
+          flicker_probability: 50%
+          flicker_transition_length: 100
+          red: 100%
+          green: 50%
+
+      - candle:
+          name: "Candle - Calm Room Mild"
+          intensity: 20%
+          flicker_probability: 50%
           red: 100%
           green: 50%
 
       - candle:
           name: "Candle - Calm"
-          intensity: 10%
+          intensity: 30%
 
       - candle:
           name: "Candle Test Breezy 50ms"
           intensity: 15%
-          flicker_depth: 10%
-          flicker_speed: 50
+          # flicker_intensity: 10%
+          flicker_transition_length: 50
 
       - candle:
           name: "Candle Test Breezy 75ms"
           intensity: 15%
-          flicker_depth: 10%
-          flicker_speed: 75
+          # flicker_intensity: 10%
+          flicker_transition_length: 75
           red: 100%
           green: 50%
 
       - candle:
           name: "Candle Test Breezy 100ms"
           intensity: 15%
-          flicker_depth: 10%
-          flicker_speed: 100
+          # flicker_intensity: 10%
+          flicker_transition_length: 100
 
       - candle:
           name: "Candle - Breezy 150ms"
           intensity: 15%
-          flicker_depth: 10%
-          flicker_speed: 150
+          # flicker_intensity: 10%
+          flicker_transition_length: 150
 
       - candle:
           name: "Candle Test Breezy 200ms"
           intensity: 15%
-          flicker_depth: 10%
-          flicker_speed: 200
+          # flicker_intensity: 10%
+          flicker_transition_length: 200
 
       - candle:
           name: "Candle Test Breezy 250ms"
           intensity: 15%
-          flicker_depth: 10%
-          flicker_speed: 250
+          # flicker_intensity: 10%
+          flicker_transition_length: 250
 
 script:
     # increment global_quick_boot_count if bulb stays on less than 10 seconds or never connects to wifi
