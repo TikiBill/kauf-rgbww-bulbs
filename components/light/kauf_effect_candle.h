@@ -9,16 +9,16 @@
 namespace esphome {
 namespace light {
 
-class CandleLightEffect : public LightEffect {
+class FlameLightEffect : public LightEffect {
  public:
-  explicit CandleLightEffect(const std::string &name) : LightEffect(name) {}
+  explicit FlameLightEffect(const std::string &name) : LightEffect(name) {}
 
   void start() override {
-      this->need_initial_brightness_ = true;
+      this->is_initial_brightness_needed_ = true;
   }
 
   void stop() override {
-      ESP_LOGD("CandleLightEffect", "Restore Initial Brightness: %.3f",
+      ESP_LOGD("FlameLightEffect", "Restore Initial Brightness: %.3f",
         this->initial_brightness_);
       auto call = this->state_->make_call();
       call.set_color_mode(this->color_mode_);
@@ -26,9 +26,76 @@ class CandleLightEffect : public LightEffect {
       call.perform();
   }
 
+  /*
+   * The overall max intensity swing of the flicker, based on the starting
+   * brightness. Since there are three brightness levels below the baseline,
+   * this value is divided by three for internal use.
+   */
+  void set_intensity(float intensity) { this->sub_intensity_ = intensity / 3.0f; }
+  void set_flicker_intensity(float flicker_intensity) { this->flicker_intensity_ = flicker_intensity; }
+  void set_flicker_probability(float percent) { this->flicker_probability_ = percent; }
+  void set_flicker_transition_length(int speed_ms) { this->transition_length_ms_ = speed_ms; }
+  void set_flicker_transition_length_jitter(int speed_jitter_ms) { this->transition_length_jitter_ms_ = speed_jitter_ms; }
+  void set_red(float red) { this->red_ = red; if(red > 0.0f){ this->have_custom_color_ = true; }}
+  void set_green(float green) { this->green_ = green;  if(green > 0.0f){ this->have_custom_color_ = true; }}
+  void set_blue(float blue) { this->blue_ = blue;  if(blue > 0.0f){ this->have_custom_color_ = true; }}
+
+ protected:
+  // The intensity of each step, one third of the requested intensity since we have
+  // three steps below max brightness.
+  float sub_intensity_ = 0.10f;
+  float flicker_probability_ = 0.8f;
+  float flicker_intensity_ = 0.50f;
+  int transition_length_ms_ = 100;
+  int transition_length_jitter_ms_ = 10;
+
+  bool have_custom_color_ = false;
+  float red_ = 0.0f;
+  float green_ = 0.0f;
+  float blue_ = 0.0f;
+
+  // State
+  bool is_initial_brightness_needed_;
+  float initial_brightness_;
+  ColorMode color_mode_ = ColorMode::UNKNOWN;
+  int flicker_state_ = 0;
+  int previous_flicker_state_ = 0;
+  int flickers_left_ = 0;
+
+  /*
+   * Track if the flicker is on the bright or dim part of the
+   * cycle so it can be toggled.
+   */
+  bool is_bright_flicker_ = true;
+
+  /*
+   * The brightness percent for the bright part of the flicker.
+   * This gets changes in the code when a new flicker state is determined
+   * and is scaled based on many factors.
+   */
+  float flicker_bright_brightness_ = 0.95f;
+
+  /*
+   * The brightness percent for the dim part of the flicker.
+   * This gets changes in the code when a new flicker state is determined
+   * and is scaled based on many factors.
+   */
+  float flicker_dim_brightness_ = 0.90f;
+
+  //float brightness_scale_ = 1.0f;
+
+};
+
+/*
+ * A candle has a normal brightness and flickers dim when a breese comes by.
+ */
+class CandleLightEffect : public FlameLightEffect {
+ public:
+  explicit CandleLightEffect(const std::string &name) : FlameLightEffect(name) {}
+
   void apply() override {
 
-      if (this->state_->transformer_active) {
+      if (this->state_->is_transformer_active()) {
         // Something is already running.
         return;
       }
@@ -53,10 +120,10 @@ class CandleLightEffect : public LightEffect {
         return;
       }
 
-      if (this->need_initial_brightness_){
+      if (this->is_initial_brightness_needed_){
         // Only get the brightness after all transitions have finished otherwise
         // we may get zero/off.
-        this->need_initial_brightness_ = false;
+        this->is_initial_brightness_needed_ = false;
         this->initial_brightness_ = this->state_->current_values.get_brightness();
         this->color_mode_ = this->state_->current_values.get_color_mode();
 
@@ -148,7 +215,7 @@ class CandleLightEffect : public LightEffect {
 
         r = random_float();
         if (r <= 0.5){
-          is_bright_flicker_ = true; // start with the dimmer of the two.
+          is_bright_flicker_ = true; // start with the brighter of the two.
         } else {
           is_bright_flicker_ = false; // start with the dimmer of the two.
         }
@@ -173,47 +240,6 @@ class CandleLightEffect : public LightEffect {
 
       call.perform();
     }
-
-
-  /*
-   * The overall max intensity swing of the flicker, based on the starting
-   * brightness. Since there are three brightness levels below the baseline,
-   * this value is divided by three for internal use.
-   */
-  void set_intensity(float intensity) { this->sub_intensity_ = intensity / 3; }
-  void set_flicker_intensity(float flicker_intensity) { this->flicker_intensity_ = flicker_intensity; }
-  void set_flicker_probability(float percent) { this->flicker_probability_ = percent; }
-  void set_flicker_transition_length(int speed_ms) { this->transition_length_ms_ = speed_ms; }
-  void set_flicker_transition_length_jitter(int speed_jitter_ms) { this->transition_length_jitter_ms_ = speed_jitter_ms; }
-  void set_red(float red) { this->red_ = red; if(red > 0.0f){ this->have_custom_color_ = true; }}
-  void set_green(float green) { this->green_ = green;  if(green > 0.0f){ this->have_custom_color_ = true; }}
-  void set_blue(float blue) { this->blue_ = blue;  if(blue > 0.0f){ this->have_custom_color_ = true; }}
-
- protected:
-  // The intensity of each step, one third of the requested intensity since we have
-  // three steps below max brightness.
-  float sub_intensity_ = 0.10f;
-  float flicker_probability_ = 0.8f;
-  float flicker_intensity_ = 0.50f;
-  int transition_length_ms_ = 100;
-  int transition_length_jitter_ms_ = 10;
-
-  bool have_custom_color_ = false;
-  float red_ = 0.0f;
-  float green_ = 0.0f;
-  float blue_ = 0.0f;
-
-  // State
-  bool need_initial_brightness_;
-  float initial_brightness_;
-  ColorMode color_mode_ = ColorMode::UNKNOWN;
-  int flicker_state_ = 0;
-  int previous_flicker_state_ = 0;
-  int flickers_left_ = 0;
-  bool is_bright_flicker_ = true;
-  float flicker_bright_brightness_ = 0.95f;
-  float flicker_dim_brightness_ = 0.90f;
-  float brightness_scale_ = 1.0f;
 };
 
 }  // namespace light
