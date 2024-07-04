@@ -53,6 +53,7 @@ StrobeLightEffect = light_ns.class_("StrobeLightEffect", LightEffect)
 StrobeLightEffectColor = light_ns.class_("StrobeLightEffectColor", LightEffect)
 FlickerLightEffect = light_ns.class_("FlickerLightEffect", LightEffect)
 CandleLightEffect = light_ns.class_("CandleLightEffect", LightEffect)
+FireplaceLightEffect = light_ns.class_("FireplaceLightEffect", LightEffect)
 AddressableLightEffect = light_ns.class_("AddressableLightEffect", LightEffect)
 AddressableLambdaLightEffect = light_ns.class_(
     "AddressableLambdaLightEffect", AddressableLightEffect

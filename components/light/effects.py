@@ -45,6 +45,7 @@ from .types import (
     AddressableLambdaLightEffect,
     FlickerLightEffect,
     CandleLightEffect,
+    FireplaceLightEffect,
     AddressableRainbowLightEffect,
     AddressableColorWipeEffect,
     AddressableColorWipeEffectColor,
@@ -357,6 +358,33 @@ async def flicker_effect_to_code(config, effect_id):
     },
 )
 async def candle_effect_to_code(config, effect_id):
+    var = cg.new_Pvariable(effect_id, config[CONF_NAME])
+    cg.add(var.set_intensity(config[CONF_INTENSITY]))
+    cg.add(var.set_flicker_intensity(config[CONF_FLICKER_INTENSITY]))
+    cg.add(var.set_flicker_probability(config[CONF_FLICKER_PROBABILITY]))
+    cg.add(var.set_flicker_transition_length(config[CONF_FLICKER_TRANSITION_LENGTH]))
+    cg.add(var.set_flicker_transition_length_jitter(config[CONF_FLICKER_TRANSITION_LENGTH_JITTER]))
+    cg.add(var.set_red(config[CONF_RED]))
+    cg.add(var.set_green(config[CONF_GREEN]))
+    cg.add(var.set_blue(config[CONF_BLUE]))
+    return var
+
+@register_monochromatic_effect(
+    "fireplace",
+    FireplaceLightEffect,
+    "Fireplace",
+    {
+        cv.Optional(CONF_INTENSITY, default=0.300): cv.percentage,
+        cv.Optional(CONF_FLICKER_INTENSITY, default=0.500): cv.percentage,
+        cv.Optional(CONF_FLICKER_PROBABILITY, default=0.80): cv.percentage,
+        cv.Optional(CONF_FLICKER_TRANSITION_LENGTH, default=100): cv.uint32_t,
+        cv.Optional(CONF_FLICKER_TRANSITION_LENGTH_JITTER, default=10): cv.uint32_t,
+        cv.Optional(CONF_RED, default=0.0):  cv.percentage,
+        cv.Optional(CONF_GREEN, default=0.0): cv.percentage,
+        cv.Optional(CONF_BLUE, default=0.0): cv.percentage,
+    },
+)
+async def fireplace_effect_to_code(config, effect_id):
     var = cg.new_Pvariable(effect_id, config[CONF_NAME])
     cg.add(var.set_intensity(config[CONF_INTENSITY]))
     cg.add(var.set_flicker_intensity(config[CONF_FLICKER_INTENSITY]))
