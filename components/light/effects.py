@@ -44,6 +44,7 @@ from .types import (
     AddressableLightRef,
     AddressableLambdaLightEffect,
     FlickerLightEffect,
+    FlameEffectColor,
     CandleLightEffect,
     FireplaceLightEffect,
     AddressableRainbowLightEffect,
@@ -347,14 +348,23 @@ async def flicker_effect_to_code(config, effect_id):
     CandleLightEffect,
     "Candle",
     {
-        cv.Optional(CONF_INTENSITY, default=0.300): cv.percentage,
-        cv.Optional(CONF_FLICKER_INTENSITY, default=0.500): cv.percentage,
+        cv.Optional(CONF_INTENSITY, default=0.150): cv.percentage,
+        cv.Optional(CONF_FLICKER_INTENSITY, default=0.0): cv.percentage,
         cv.Optional(CONF_FLICKER_PROBABILITY, default=0.80): cv.percentage,
-        cv.Optional(CONF_FLICKER_TRANSITION_LENGTH, default=100): cv.uint32_t,
+        cv.Optional(CONF_FLICKER_TRANSITION_LENGTH, default=75): cv.uint32_t,
         cv.Optional(CONF_FLICKER_TRANSITION_LENGTH_JITTER, default=10): cv.uint32_t,
         cv.Optional(CONF_RED, default=0.0):  cv.percentage,
         cv.Optional(CONF_GREEN, default=0.0): cv.percentage,
         cv.Optional(CONF_BLUE, default=0.0): cv.percentage,
+        cv.Optional(
+            CONF_COLORS, default=[]
+        ): cv.ensure_list(
+            {
+                cv.Optional(CONF_RED, default=0.0): cv.percentage,
+                cv.Optional(CONF_GREEN, default=0.0): cv.percentage,
+                cv.Optional(CONF_BLUE, default=0.0): cv.percentage,
+            }
+        ),
     },
 )
 async def candle_effect_to_code(config, effect_id):
@@ -367,6 +377,19 @@ async def candle_effect_to_code(config, effect_id):
     cg.add(var.set_red(config[CONF_RED]))
     cg.add(var.set_green(config[CONF_GREEN]))
     cg.add(var.set_blue(config[CONF_BLUE]))
+
+    colors = []
+    for color in config.get(CONF_COLORS, []):
+        colors.append(
+            cg.StructInitializer(
+                FlameEffectColor,
+                ("r", float(color[CONF_RED])),
+                ("g", float(color[CONF_GREEN])),
+                ("b", float(color[CONF_BLUE])),
+            )
+        )
+    cg.add(var.set_colors(colors))
+
     return var
 
 @register_monochromatic_effect(
@@ -374,14 +397,23 @@ async def candle_effect_to_code(config, effect_id):
     FireplaceLightEffect,
     "Fireplace",
     {
-        cv.Optional(CONF_INTENSITY, default=0.300): cv.percentage,
-        cv.Optional(CONF_FLICKER_INTENSITY, default=0.500): cv.percentage,
+        cv.Optional(CONF_INTENSITY, default=0.210): cv.percentage,
+        cv.Optional(CONF_FLICKER_INTENSITY, default=0.0): cv.percentage,
         cv.Optional(CONF_FLICKER_PROBABILITY, default=0.80): cv.percentage,
-        cv.Optional(CONF_FLICKER_TRANSITION_LENGTH, default=100): cv.uint32_t,
-        cv.Optional(CONF_FLICKER_TRANSITION_LENGTH_JITTER, default=10): cv.uint32_t,
+        cv.Optional(CONF_FLICKER_TRANSITION_LENGTH, default=150): cv.uint32_t,
+        cv.Optional(CONF_FLICKER_TRANSITION_LENGTH_JITTER, default=20): cv.uint32_t,
         cv.Optional(CONF_RED, default=0.0):  cv.percentage,
         cv.Optional(CONF_GREEN, default=0.0): cv.percentage,
         cv.Optional(CONF_BLUE, default=0.0): cv.percentage,
+        cv.Optional(
+            CONF_COLORS, default=[]
+        ): cv.ensure_list(
+            {
+                cv.Optional(CONF_RED, default=0.0): cv.percentage,
+                cv.Optional(CONF_GREEN, default=0.0): cv.percentage,
+                cv.Optional(CONF_BLUE, default=0.0): cv.percentage,
+            }
+        ),
     },
 )
 async def fireplace_effect_to_code(config, effect_id):
@@ -394,6 +426,19 @@ async def fireplace_effect_to_code(config, effect_id):
     cg.add(var.set_red(config[CONF_RED]))
     cg.add(var.set_green(config[CONF_GREEN]))
     cg.add(var.set_blue(config[CONF_BLUE]))
+
+    colors = []
+    for color in config.get(CONF_COLORS, []):
+        colors.append(
+            cg.StructInitializer(
+                FlameEffectColor,
+                ("r", float(color[CONF_RED])),
+                ("g", float(color[CONF_GREEN])),
+                ("b", float(color[CONF_BLUE])),
+            )
+        )
+    cg.add(var.set_colors(colors))
+
     return var
 
 @register_addressable_effect(

@@ -40,14 +40,14 @@ light:
       - candle:
           name: "Tealight - Calm Room"
           intensity: 10%
-          flicker_intensity: 05%
+          # flicker_intensity: 05%
           flicker_probability: 50%
           flicker_transition_length: 100
 
       - candle:
           name: "Tealight - Breezy"
           intensity: 10%
-          flicker_intensity: 05%
+          # flicker_intensity: 05%
           flicker_probability: 80%
           flicker_transition_length: 75
 
@@ -58,13 +58,13 @@ light:
       - candle:
           name: "Candle Test Breezy 50ms"
           intensity: 15%
-          flicker_intensity: 10%
+          # flicker_intensity: 10%
           flicker_transition_length: 50
 
       - candle:
           name: "Candle Test Breezy 75ms"
           intensity: 15%
-          flicker_intensity: 10%
+          # flicker_intensity: 10%
           flicker_transition_length: 75
           red: 100%
           green: 50%
@@ -72,24 +72,40 @@ light:
       - candle:
           name: "Candle Test Breezy 100ms"
           intensity: 15%
-          flicker_intensity: 10%
+          # flicker_intensity: 10%
           flicker_transition_length: 100
 
       - candle:
           name: "Candle - Breezy 150ms"
           intensity: 15%
-          flicker_intensity: 10%
+          # flicker_intensity: 10%
           flicker_transition_length: 150
 
       - candle:
           name: "Candle Test Breezy 200ms"
           intensity: 15%
-          flicker_intensity: 10%
+          # flicker_intensity: 10%
           flicker_transition_length: 200
 
       - candle:
           name: "Candle Test Breezy 250ms"
           intensity: 15%
-          flicker_intensity: 10%
+          # flicker_intensity: 10%
           flicker_transition_length: 250
 
+      - fireplace:
+          name: "Fireplace Test Breezy 15"
+          intensity: 15%
+          flicker_transition_length: 150
+
+      - fireplace:
+          name: "Fireplace Test Breezy 21"
+          intensity: 21%
+          flicker_transition_length: 150
+          colors:
+            - red: 100%
+              green: 50%
+              blue: 0%
+            - red: 100%
+              green: 100%
+              blue: 50%
