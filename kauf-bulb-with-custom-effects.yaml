@@ -1,5 +1,5 @@
 substitutions:
-  project_ver_let: v
+  project_ver_let: w
   default_power_on_state: "Always On - Last Value"
   wifi_ap_timeout: 15s    # default to 15 second timeout for update bin file
 
@@ -41,14 +41,16 @@ light:
           name: "Tealight - Calm Room"
           intensity: 10%
           # flicker_intensity: 05%
-          flicker_probability: 50%
           flicker_transition_length: 100
+          flicker_level_probabilities:
+            - probability: 30%
+            - probability: 10%
+            - probability: 5%
 
       - candle:
           name: "Tealight - Breezy"
           intensity: 10%
           # flicker_intensity: 05%
-          flicker_probability: 80%
           flicker_transition_length: 75
 
       - candle:
@@ -80,6 +82,10 @@ light:
           intensity: 15%
           # flicker_intensity: 10%
           flicker_transition_length: 75
+          flicker_level_probabilities:
+            - probability: 40%
+            - probability: 22%
+            - probability: 8%
           colors:
             - red: 100%
               green: 56%
@@ -146,3 +152,14 @@ light:
             - red: 100%
               green: 66%
               blue: 22%
+          flicker_config:
+            - probability: 40%
+              number_flickers: 2
+            - probability: 30%
+              number_flickers: 4
+            - probability: 20%
+              number_flickers: 8
+            - probability: 10%
+              number_flickers: 10
+            - force_at_level: 3
+              number_flickers: 1

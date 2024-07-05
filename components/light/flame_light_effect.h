@@ -9,8 +9,14 @@
 namespace esphome {
 namespace light {
 
-struct FlameEffectColor {
-  float r, g, b;
+struct FlameEffectNumberFlickers {
+  int force_at_level = 0;
+  float probability = 0.1f;
+  int number_flickers = 5;
+
+  FlameEffectNumberFlickers() : force_at_level(0), probability(0.1f), number_flickers(5) {}
+  FlameEffectNumberFlickers(float probability, int number_flickers) : force_at_level(0), probability(probability), number_flickers(number_flickers) {}
+  FlameEffectNumberFlickers(int force_at_level, int number_flickers) : force_at_level(force_at_level), probability(0.0f), number_flickers(number_flickers) {}
 };
 
 
@@ -23,18 +29,61 @@ class FlameLightEffect : public LightEffect {
       this->is_baseline_brightness_needed_ = true;
       this->flickers_left_ = 0;
       if (this->have_custom_flicker_intensity_) {
-        ESP_LOGD("FlameLightEffect", "User supplied flicker intensity: %.3f    Overall intensity: %.3f",
+        ESP_LOGD("FlameLightEffect", "start()    User supplied flicker intensity: %.3f    Overall intensity: %.3f",
           this->flicker_intensity_, this->intensity_);
       } else {
         this->flicker_intensity_ = this->intensity_ / this->number_levels_ / 2.0f;
-        ESP_LOGD("FlameLightEffect", "Calculated flicker intensity: %.3f    Overall intensity: %.3f",
+        ESP_LOGD("FlameLightEffect", "start()    Calculated flicker intensity: %.3f    Overall intensity: %.3f",
           this->flicker_intensity_, this->intensity_);
       }
 
-      ESP_LOGD("FlameLightEffect", "Speed: %dms   Jitter: %d    Flicker Percent: %.3f",
-        this->transition_length_ms_, this->transition_length_jitter_ms_, this->flicker_probability_);
+      ESP_LOGD("FlameLightEffect", "start()    Speed: %dms   Jitter: %d",
+        this->transition_length_ms_, this->transition_length_jitter_ms_);
 
-      ESP_LOGD("FlameLightEffect", "User supplied %d colors.", this->colors_.size());
+      ESP_LOGD("FlameLightEffect", "start()    User supplied %d colors.", this->colors_.size());
+
+      if(this->flicker_level_probabilities_.size() == 0){
+        this->flicker_level_probabilities_ = { 0.5f, 0.3f, 0.08f };
+        ESP_LOGD("FlameLightEffect", "start()    Default flicker probability.");
+      } else {
+        ESP_LOGD("FlameLightEffect", "start()    User supplied %d flicker probabilities.", this->flicker_level_probabilities_.size());
+      }
+
+      // Ensure the probability count matches the number of levels.
+      while(this->flicker_level_probabilities_.size() < this->number_levels_)
+      {
+        float nextVal = this->flicker_level_probabilities_.size() > 0
+          ? this->flicker_level_probabilities_[this->flicker_level_probabilities_.size() - 1] / 2.0f
+          : 1.0f;
+        ESP_LOGW("FlameLightEffect", "start()    Not enough flicker_level_probability values, adding %.3f.", nextVal);
+        this->flicker_level_probabilities_.push_back(nextVal);
+      }
+
+      float cumulative_probability = 0.0f;
+      for(int i = 0; i < this->flicker_level_probabilities_.size(); i++)
+      {
+        cumulative_probability += this->flicker_level_probabilities_[i];
+        ESP_LOGD("FlameLightEffect", "start()    Flicker Probability %d: %.2f", i, this->flicker_level_probabilities_[i]);
+      }
+
+      if(cumulative_probability >= 1.0f) {
+        ESP_LOGW("FlameLightEffect", "start()    Your cumulative flicker probability is >= 100% (%.3f) -- Zero non-flicker time.",
+          cumulative_probability);
+      } else {
+        ESP_LOGD("FlameLightEffect", "start()   cumulative flicker probability: %.3f", cumulative_probability);
+      }
+
+      if (this->number_flickers_config_.size() == 0){
+        this->number_flickers_config_ = {
+          FlameEffectNumberFlickers(0.40f, 2), // The first probability does not matter, it acts as the fall-through.
+          FlameEffectNumberFlickers(0.20f, 4),
+          FlameEffectNumberFlickers(0.10f, 8),
+          FlameEffectNumberFlickers(0.05f, 10),
+          FlameEffectNumberFlickers(3, 1), // At level 3, we force a single flicker.
+        };
+      }
+
+      ESP_LOGD("FlameLightEffect", "start()    Done.");
   }
 
   void stop() override {
@@ -53,7 +102,7 @@ class FlameLightEffect : public LightEffect {
       return;
     }
 
-    if (this->have_custom_colors_){
+    if (this->have_custom_colors_ && this->colors_.size() > 0){
       // Setting the custom color is not in the start() because we
       // do not want to interrupt a running transformer.
 
@@ -76,25 +125,6 @@ class FlameLightEffect : public LightEffect {
       return;
     }
 
-    // if (this->have_custom_color_){
-    //   // This is not in the start() because we do not want to
-    //   // interrupt a running transformer.
-    //   this->have_custom_color_ = false; // Only do this once.
-
-    //   ESP_LOGD("FlameLightEffect", "Have a custom color  R: %.2f  G: %.2f  B: %.2f",
-    //     this->red_, this->green_, this->blue_);
-
-    //   auto call = this->state_->make_call();
-    //   call.set_color_mode(ColorMode::RGB);
-    //   // Commented out 'cause We will use the default transistion.
-    //   // call.set_transition_length(transition_time_ms * 4);
-    //   call.set_brightness(1.0f);
-    //   call.set_rgb(this->red_, this->green_, this->blue_);
-    //   call.set_state(true);
-    //   call.perform();
-
-    //   return;
-    // }
 
     if (this->is_baseline_brightness_needed_){
       // Only get the brightness after all transitions have finished otherwise
@@ -122,7 +152,7 @@ class FlameLightEffect : public LightEffect {
       }
 
       set_min_max_brightness();
-      return; // Important! Wait for the next pass to start effects.
+      return; // Important! Wait for the next pass to start effects since we may have a transition running now.
     }
 
     float new_brightness;
@@ -152,9 +182,11 @@ class FlameLightEffect : public LightEffect {
       float dim_depth = 0.0f;
       this->flicker_state_ = 0;
 
-      for(int i = this->flicker_level_probability_.size(); i > 0; i--)
+      float cumulative_probability = 0.0f;
+      for(int i = this->flicker_level_probabilities_.size(); i > 0; i--)
       {
-        if(r <= this->flicker_level_probability_[i - 1]) {
+        cumulative_probability += this->flicker_level_probabilities_[i - 1];
+        if(r <= cumulative_probability) {
           dim_depth = i;
           this->flicker_state_ = i;
           break;
@@ -283,9 +315,6 @@ class FlameLightEffect : public LightEffect {
      }
   }
 
-  void set_flicker_probability(float percent) { this->flicker_probability_ = percent; }
-  void set_flicker_level_probability(const std::vector<float> &values) { this->flicker_level_probability_ = values; this->number_levels_ = (float)values.size();}
-
   void set_flicker_transition_length(int speed_ms) { this->transition_length_ms_ = speed_ms; }
   void set_flicker_transition_length_jitter(int speed_jitter_ms) { this->transition_length_jitter_ms_ = speed_jitter_ms; }
   void set_use_exponential_gradient(bool enabled){ this->use_exponential_gradient_ = enabled; }
@@ -297,13 +326,25 @@ class FlameLightEffect : public LightEffect {
   void set_blue2(float blue) { this->blue2_ = blue;  if(blue > 0.0f){ this->have_custom_color2_ = true; }}
 
   void set_colors(const std::vector<Color> &colors) { this->colors_ = colors; this->have_custom_colors_ = true; }
+  void set_flicker_level_probabilities(const std::vector<float> &values) {
+    if(values.size() > 0)
+    {
+      this->flicker_level_probabilities_= values;
+    }
+  }
+
+  void set_number_flickers_config(const std::vector<FlameEffectNumberFlickers> &config){
+    if(config.size() > 0)
+    {
+      this->number_flickers_config_ = config;
+    }
+  }
 
  protected:
   /*
    * The overall brightness swing of all levels of flicker.
    */
   float intensity_ = 0.15f;
-  float flicker_probability_ = 0.8f;
   bool have_custom_flicker_intensity_ = false;
 
   /*
@@ -313,7 +354,9 @@ class FlameLightEffect : public LightEffect {
   int transition_length_ms_ = 100;
   int transition_length_jitter_ms_ = 10;
 
-  std::vector<float> flicker_level_probability_ = { 0.8f, 0.4f, 0.08f };
+  std::vector<float> flicker_level_probabilities_ = {}; //{ 0.8f, 0.4f, 0.08f };
+
+  std::vector<FlameEffectNumberFlickers> number_flickers_config_ = {};
 
   float number_levels_ = 3.0f;
 

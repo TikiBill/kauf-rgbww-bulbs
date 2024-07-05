@@ -44,7 +44,7 @@ from .types import (
     AddressableLightRef,
     AddressableLambdaLightEffect,
     FlickerLightEffect,
-    FlameEffectColor,
+    FlameEffectNumberFlickers,
     CandleLightEffect,
     FireplaceLightEffect,
     AddressableRainbowLightEffect,
@@ -83,9 +83,10 @@ CONF_AUTOMATION = "automation"
 CONF_ON_LENGTH = "on_length"
 CONF_OFF_LENGTH = "off_length"
 CONF_FLICKER_INTENSITY = "flicker_intensity"
-CONF_FLICKER_PROBABILITY = "flicker_probability"
+CONF_FLICKER_LEVEL_PROBABILITIES = "flicker_level_probabilities"
 CONF_FLICKER_TRANSITION_LENGTH = "flicker_transition_length"
 CONF_FLICKER_TRANSITION_LENGTH_JITTER = "flicker_transition_length_jitter"
+CONF_FLICKER_CONFIG="flicker_config"
 CONF_USE_EXPONENTIAL_GRADIENT="use_exponential_gradient"
 CONF_SET_RGB_COLOR="rgb_color"
 
@@ -351,7 +352,12 @@ async def flicker_effect_to_code(config, effect_id):
     {
         cv.Optional(CONF_INTENSITY, default=0.150): cv.percentage,
         cv.Optional(CONF_FLICKER_INTENSITY, default=0.0): cv.percentage,
-        cv.Optional(CONF_FLICKER_PROBABILITY, default=0.80): cv.percentage,
+        # cv.Optional(CONF_FLICKER_LEVEL_PROBABILITIES, default=0.80): cv.percentage,
+        cv.Optional(CONF_FLICKER_LEVEL_PROBABILITIES, default=[]): cv.ensure_list(
+            {
+                cv.Optional("probability", default=0.0): cv.percentage,
+            }
+        ),
         cv.Optional(CONF_FLICKER_TRANSITION_LENGTH, default=75): cv.uint32_t,
         cv.Optional(CONF_FLICKER_TRANSITION_LENGTH_JITTER, default=10): cv.uint32_t,
         cv.Optional(CONF_USE_EXPONENTIAL_GRADIENT, default=True): cv.boolean,
@@ -371,10 +377,14 @@ async def candle_effect_to_code(config, effect_id):
     var = cg.new_Pvariable(effect_id, config[CONF_NAME])
     cg.add(var.set_intensity(config[CONF_INTENSITY]))
     cg.add(var.set_flicker_intensity(config[CONF_FLICKER_INTENSITY]))
-    cg.add(var.set_flicker_probability(config[CONF_FLICKER_PROBABILITY]))
     cg.add(var.set_flicker_transition_length(config[CONF_FLICKER_TRANSITION_LENGTH]))
     cg.add(var.set_flicker_transition_length_jitter(config[CONF_FLICKER_TRANSITION_LENGTH_JITTER]))
     cg.add(var.set_use_exponential_gradient(config[CONF_USE_EXPONENTIAL_GRADIENT]))
+
+    probabilities = []
+    for prob in config.get(CONF_FLICKER_LEVEL_PROBABILITIES, []):
+        probabilities.append(prob["probability"])
+    cg.add(var.set_flicker_level_probabilities(probabilities))
 
     colors = []
     for color in config.get(CONF_COLORS, []):
@@ -398,7 +408,12 @@ async def candle_effect_to_code(config, effect_id):
     {
         cv.Optional(CONF_INTENSITY, default=0.210): cv.percentage,
         cv.Optional(CONF_FLICKER_INTENSITY, default=0.0): cv.percentage,
-        cv.Optional(CONF_FLICKER_PROBABILITY, default=0.80): cv.percentage,
+        # cv.Optional(CONF_FLICKER_LEVEL_PROBABILITIES, default=0.80): cv.percentage,
+        cv.Optional(CONF_FLICKER_LEVEL_PROBABILITIES, default=[]): cv.ensure_list(
+            {
+                cv.Optional("probability", default=0.0): cv.percentage,
+            }
+        ),
         cv.Optional(CONF_FLICKER_TRANSITION_LENGTH, default=150): cv.uint32_t,
         cv.Optional(CONF_FLICKER_TRANSITION_LENGTH_JITTER, default=20): cv.uint32_t,
         cv.Optional(CONF_USE_EXPONENTIAL_GRADIENT, default=True): cv.boolean,
@@ -412,16 +427,29 @@ async def candle_effect_to_code(config, effect_id):
                 cv.Optional(CONF_WHITE, default=0.0): cv.percentage,
             }
         ),
+        cv.Optional(
+            CONF_FLICKER_CONFIG, default=[]
+        ): cv.ensure_list(
+            {
+                cv.Optional("force_at_level", default=0): cv.uint32_t,
+                cv.Optional("probability", default=0.10): cv.percentage,
+                cv.Optional("number_flickers", default=0.0): cv.uint32_t,
+            }
+        ),
     },
 )
 async def fireplace_effect_to_code(config, effect_id):
     var = cg.new_Pvariable(effect_id, config[CONF_NAME])
     cg.add(var.set_intensity(config[CONF_INTENSITY]))
     cg.add(var.set_flicker_intensity(config[CONF_FLICKER_INTENSITY]))
-    cg.add(var.set_flicker_probability(config[CONF_FLICKER_PROBABILITY]))
     cg.add(var.set_flicker_transition_length(config[CONF_FLICKER_TRANSITION_LENGTH]))
     cg.add(var.set_flicker_transition_length_jitter(config[CONF_FLICKER_TRANSITION_LENGTH_JITTER]))
     cg.add(var.set_use_exponential_gradient(config[CONF_USE_EXPONENTIAL_GRADIENT]))
+
+    probabilities = []
+    for prob in config.get(CONF_FLICKER_LEVEL_PROBABILITIES, []):
+        probabilities.append(prob["probability"])
+    cg.add(var.set_flicker_level_probabilities(probabilities))
 
     colors = []
     for color in config.get(CONF_COLORS, []):
@@ -435,6 +463,17 @@ async def fireplace_effect_to_code(config, effect_id):
             )
         )
     cg.add(var.set_colors(colors))
+
+    flicker_configs = []
+    for flicker_config in config.get(CONF_FLICKER_CONFIG, []):
+        flicker_configs.append(
+            cg.StructInitializer(
+                FlameEffectNumberFlickers,
+                ("force_at_level", flicker_config["force_at_level"]),
+                ("probability", flicker_config["probability"]),
+                ("number_flickers", flicker_config["number_flickers"]),
+            )
+        )
 
     return var
 
