@@ -86,6 +86,7 @@ CONF_FLICKER_INTENSITY = "flicker_intensity"
 CONF_FLICKER_PROBABILITY = "flicker_probability"
 CONF_FLICKER_TRANSITION_LENGTH = "flicker_transition_length"
 CONF_FLICKER_TRANSITION_LENGTH_JITTER = "flicker_transition_length_jitter"
+CONF_USE_EXPONENTIAL_GRADIENT="use_exponential_gradient"
 CONF_SET_RGB_COLOR="rgb_color"
 
 BINARY_EFFECTS = []
@@ -353,9 +354,7 @@ async def flicker_effect_to_code(config, effect_id):
         cv.Optional(CONF_FLICKER_PROBABILITY, default=0.80): cv.percentage,
         cv.Optional(CONF_FLICKER_TRANSITION_LENGTH, default=75): cv.uint32_t,
         cv.Optional(CONF_FLICKER_TRANSITION_LENGTH_JITTER, default=10): cv.uint32_t,
-        cv.Optional(CONF_RED, default=0.0):  cv.percentage,
-        cv.Optional(CONF_GREEN, default=0.0): cv.percentage,
-        cv.Optional(CONF_BLUE, default=0.0): cv.percentage,
+        cv.Optional(CONF_USE_EXPONENTIAL_GRADIENT, default=True): cv.boolean,
         cv.Optional(
             CONF_COLORS, default=[]
         ): cv.ensure_list(
@@ -363,6 +362,7 @@ async def flicker_effect_to_code(config, effect_id):
                 cv.Optional(CONF_RED, default=0.0): cv.percentage,
                 cv.Optional(CONF_GREEN, default=0.0): cv.percentage,
                 cv.Optional(CONF_BLUE, default=0.0): cv.percentage,
+                cv.Optional(CONF_WHITE, default=0.0): cv.percentage,
             }
         ),
     },
@@ -374,18 +374,17 @@ async def candle_effect_to_code(config, effect_id):
     cg.add(var.set_flicker_probability(config[CONF_FLICKER_PROBABILITY]))
     cg.add(var.set_flicker_transition_length(config[CONF_FLICKER_TRANSITION_LENGTH]))
     cg.add(var.set_flicker_transition_length_jitter(config[CONF_FLICKER_TRANSITION_LENGTH_JITTER]))
-    cg.add(var.set_red(config[CONF_RED]))
-    cg.add(var.set_green(config[CONF_GREEN]))
-    cg.add(var.set_blue(config[CONF_BLUE]))
+    cg.add(var.set_use_exponential_gradient(config[CONF_USE_EXPONENTIAL_GRADIENT]))
 
     colors = []
     for color in config.get(CONF_COLORS, []):
         colors.append(
             cg.StructInitializer(
-                FlameEffectColor,
-                ("r", float(color[CONF_RED])),
-                ("g", float(color[CONF_GREEN])),
-                ("b", float(color[CONF_BLUE])),
+                Color,
+                ("r", int(round(color[CONF_RED] * 255))),
+                ("g", int(round(color[CONF_GREEN] * 255))),
+                ("b", int(round(color[CONF_BLUE] * 255))),
+                ("w", int(round(color[CONF_WHITE] * 255))),
             )
         )
     cg.add(var.set_colors(colors))
@@ -402,9 +401,7 @@ async def candle_effect_to_code(config, effect_id):
         cv.Optional(CONF_FLICKER_PROBABILITY, default=0.80): cv.percentage,
         cv.Optional(CONF_FLICKER_TRANSITION_LENGTH, default=150): cv.uint32_t,
         cv.Optional(CONF_FLICKER_TRANSITION_LENGTH_JITTER, default=20): cv.uint32_t,
-        cv.Optional(CONF_RED, default=0.0):  cv.percentage,
-        cv.Optional(CONF_GREEN, default=0.0): cv.percentage,
-        cv.Optional(CONF_BLUE, default=0.0): cv.percentage,
+        cv.Optional(CONF_USE_EXPONENTIAL_GRADIENT, default=True): cv.boolean,
         cv.Optional(
             CONF_COLORS, default=[]
         ): cv.ensure_list(
@@ -412,6 +409,7 @@ async def candle_effect_to_code(config, effect_id):
                 cv.Optional(CONF_RED, default=0.0): cv.percentage,
                 cv.Optional(CONF_GREEN, default=0.0): cv.percentage,
                 cv.Optional(CONF_BLUE, default=0.0): cv.percentage,
+                cv.Optional(CONF_WHITE, default=0.0): cv.percentage,
             }
         ),
     },
@@ -423,18 +421,17 @@ async def fireplace_effect_to_code(config, effect_id):
     cg.add(var.set_flicker_probability(config[CONF_FLICKER_PROBABILITY]))
     cg.add(var.set_flicker_transition_length(config[CONF_FLICKER_TRANSITION_LENGTH]))
     cg.add(var.set_flicker_transition_length_jitter(config[CONF_FLICKER_TRANSITION_LENGTH_JITTER]))
-    cg.add(var.set_red(config[CONF_RED]))
-    cg.add(var.set_green(config[CONF_GREEN]))
-    cg.add(var.set_blue(config[CONF_BLUE]))
+    cg.add(var.set_use_exponential_gradient(config[CONF_USE_EXPONENTIAL_GRADIENT]))
 
     colors = []
     for color in config.get(CONF_COLORS, []):
         colors.append(
             cg.StructInitializer(
-                FlameEffectColor,
-                ("r", float(color[CONF_RED])),
-                ("g", float(color[CONF_GREEN])),
-                ("b", float(color[CONF_BLUE])),
+                Color,
+                ("r", int(round(color[CONF_RED] * 255))),
+                ("g", int(round(color[CONF_GREEN] * 255))),
+                ("b", int(round(color[CONF_BLUE] * 255))),
+                ("w", int(round(color[CONF_WHITE] * 255))),
             )
         )
     cg.add(var.set_colors(colors))

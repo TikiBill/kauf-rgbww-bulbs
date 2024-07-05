@@ -66,8 +66,27 @@ light:
           intensity: 15%
           # flicker_intensity: 10%
           flicker_transition_length: 75
-          red: 100%
-          green: 50%
+          colors:
+              # 255, 128, 18
+            - red: 100%
+              green: 50%
+              blue: 7%
+            - red: 100%
+              green: 40%
+              blue: 0%
+
+      - candle:
+          name: "Candle Test Breezy v2 75ms"
+          intensity: 15%
+          # flicker_intensity: 10%
+          flicker_transition_length: 75
+          colors:
+            - red: 100%
+              green: 56%
+              blue: 24%
+            - red: 100%
+              green: 50%
+              blue: 0%
 
       - candle:
           name: "Candle Test Breezy 100ms"
@@ -95,17 +114,35 @@ light:
 
       - fireplace:
           name: "Fireplace Test Breezy 15"
-          intensity: 15%
-          flicker_transition_length: 150
-
-      - fireplace:
-          name: "Fireplace Test Breezy 21"
           intensity: 21%
           flicker_transition_length: 150
           colors:
             - red: 100%
               green: 50%
               blue: 0%
+              # 255, 159, 64
             - red: 100%
-              green: 100%
-              blue: 50%
+              green: 56%
+              blue: 24%
+
+      - fireplace:
+          name: "Fireplace Test Breezy 21"
+          intensity: 21%
+          flicker_transition_length: 200
+          colors:
+              # 255, 128, 0
+            - red: 100%
+              green: 50%
+              blue: 0%
+              # 255, 128, 18
+            - red: 100%
+              green: 50%
+              blue: 7%
+              # 255, 150, 20
+            - red: 100%
+              green: 58%
+              blue: 8%
+              # 255, 159, 64
+            - red: 100%
+              green: 66%
+              blue: 22%
