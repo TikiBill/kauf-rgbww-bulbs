@@ -9,6 +9,11 @@
 namespace esphome {
 namespace light {
 
+/*
+ * Original version written by Bill Adams (https://github.com/TikiBill).
+ * If you find this useful or do any cool environments with it, please let him know!
+ */
+
 struct FlameEffectNumberFlickers {
   uint32_t force_at_level = 0;
   float probability = 0.1f;
