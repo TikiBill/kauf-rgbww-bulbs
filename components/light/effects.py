@@ -352,7 +352,6 @@ async def flicker_effect_to_code(config, effect_id):
     {
         cv.Optional(CONF_INTENSITY, default=0.150): cv.percentage,
         cv.Optional(CONF_FLICKER_INTENSITY, default=0.0): cv.percentage,
-        # cv.Optional(CONF_FLICKER_LEVEL_PROBABILITIES, default=0.80): cv.percentage,
         cv.Optional(CONF_FLICKER_LEVEL_PROBABILITIES, default=[]): cv.ensure_list(
             {
                 cv.Optional("probability", default=0.0): cv.percentage,
@@ -377,8 +376,8 @@ async def candle_effect_to_code(config, effect_id):
     var = cg.new_Pvariable(effect_id, config[CONF_NAME])
     cg.add(var.set_intensity(config[CONF_INTENSITY]))
     cg.add(var.set_flicker_intensity(config[CONF_FLICKER_INTENSITY]))
-    cg.add(var.set_flicker_transition_length(config[CONF_FLICKER_TRANSITION_LENGTH]))
-    cg.add(var.set_flicker_transition_length_jitter(config[CONF_FLICKER_TRANSITION_LENGTH_JITTER]))
+    cg.add(var.set_flicker_transition_duration_ms(config[CONF_FLICKER_TRANSITION_LENGTH]))
+    cg.add(var.set_flicker_transition_duration_ms_jitter(config[CONF_FLICKER_TRANSITION_LENGTH_JITTER]))
     cg.add(var.set_use_exponential_gradient(config[CONF_USE_EXPONENTIAL_GRADIENT]))
 
     probabilities = []
@@ -408,7 +407,6 @@ async def candle_effect_to_code(config, effect_id):
     {
         cv.Optional(CONF_INTENSITY, default=0.210): cv.percentage,
         cv.Optional(CONF_FLICKER_INTENSITY, default=0.0): cv.percentage,
-        # cv.Optional(CONF_FLICKER_LEVEL_PROBABILITIES, default=0.80): cv.percentage,
         cv.Optional(CONF_FLICKER_LEVEL_PROBABILITIES, default=[]): cv.ensure_list(
             {
                 cv.Optional("probability", default=0.0): cv.percentage,
@@ -442,8 +440,8 @@ async def fireplace_effect_to_code(config, effect_id):
     var = cg.new_Pvariable(effect_id, config[CONF_NAME])
     cg.add(var.set_intensity(config[CONF_INTENSITY]))
     cg.add(var.set_flicker_intensity(config[CONF_FLICKER_INTENSITY]))
-    cg.add(var.set_flicker_transition_length(config[CONF_FLICKER_TRANSITION_LENGTH]))
-    cg.add(var.set_flicker_transition_length_jitter(config[CONF_FLICKER_TRANSITION_LENGTH_JITTER]))
+    cg.add(var.set_flicker_transition_duration_ms(config[CONF_FLICKER_TRANSITION_LENGTH]))
+    cg.add(var.set_flicker_transition_duration_ms_jitter(config[CONF_FLICKER_TRANSITION_LENGTH_JITTER]))
     cg.add(var.set_use_exponential_gradient(config[CONF_USE_EXPONENTIAL_GRADIENT]))
 
     probabilities = []
