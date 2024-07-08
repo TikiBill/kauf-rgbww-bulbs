@@ -32,7 +32,7 @@ void FlameLightEffect::start(){
                 this->flicker_intensity_, this->intensity_);
     }
 
-    ESP_LOGD("FlameLightEffect", "start()    Speed: %dms   Jitter: %d", this->transition_length_ms_,
+    ESP_LOGD("FlameLightEffect", "start()    Speed: %ldms   Jitter: %ld", this->transition_length_ms_,
               this->transition_length_jitter_ms_);
 
     ESP_LOGD("FlameLightEffect", "start()    User supplied %d colors.", this->colors_.size());
@@ -68,7 +68,7 @@ void FlameLightEffect::start(){
 
     if (cumulative_probability >= 1.0f) {
       ESP_LOGW("FlameLightEffect",
-                "start()    Your cumulative flicker probability is >= 100% (total is %.1f%%) -- Zero non-flicker time.",
+                "start()    Your cumulative flicker probability is >= 100%% (total is %.1f%%) -- Zero non-flicker time.",
                 cumulative_probability * 100.0f);
     } else {
       ESP_LOGD("FlameLightEffect", "start()   cumulative flicker probability: %.3f", cumulative_probability);
