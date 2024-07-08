@@ -11,7 +11,8 @@ namespace light {
 
 /*
  * Original version written by Bill Adams (https://github.com/TikiBill).
- * If you find this useful or do any cool environments with it, please let him know!
+ * If you find this useful or do any cool environments with it, please let him know
+ * by emailing light-effects@lava-data.com.
  */
 
 struct FlameEffectNumberFlickers {
@@ -23,6 +24,8 @@ struct FlameEffectNumberFlickers {
   FlameEffectNumberFlickers() : force_at_level(0), probability(0.1f), number_flickers(5) {}
   FlameEffectNumberFlickers(float probability, int number_flickers)
       : force_at_level(0), probability(probability), number_flickers(number_flickers) {}
+  FlameEffectNumberFlickers(int force_at_level, float probability, int number_flickers)
+      : force_at_level(force_at_level), probability(probability), number_flickers(number_flickers) {}
   FlameEffectNumberFlickers(int force_at_level, int number_flickers)
       : force_at_level(force_at_level), probability(0.0f), number_flickers(number_flickers) {}
 };
@@ -34,6 +37,7 @@ class FlameLightEffect : public LightEffect {
   void start() override {
     ESP_LOGD("FlameLightEffect", "start()");
     this->is_baseline_brightness_needed_ = true;
+    this->is_custom_color_set_needed_ = true;
     this->flickers_left_ = 0;
     if (this->have_custom_flicker_intensity_) {
       ESP_LOGD("FlameLightEffect", "start()    User supplied flicker intensity: %.3f    Overall intensity: %.3f",
@@ -48,6 +52,10 @@ class FlameLightEffect : public LightEffect {
              this->transition_length_jitter_ms_);
 
     ESP_LOGD("FlameLightEffect", "start()    User supplied %d colors.", this->colors_.size());
+    for (int i = 0; i < this->colors_.size(); i++) {
+      ESP_LOGD("FlameLightEffect", "start()    Color %d    R: %d    G: %d    B: %d",
+        i, this->colors_[i].red, this->colors_[i].green, this->colors_[i].blue);
+    }
 
     if (this->flicker_level_probabilities_.size() == 0) {
       this->flicker_level_probabilities_ = {0.5f, 0.3f, 0.08f};
@@ -56,6 +64,8 @@ class FlameLightEffect : public LightEffect {
       ESP_LOGD("FlameLightEffect", "start()    User supplied %d flicker probabilities.",
                this->flicker_level_probabilities_.size());
     }
+
+    this->number_levels_ = this->flicker_level_probabilities_.size();
 
     // Ensure the probability count matches the number of levels.
     while (this->flicker_level_probabilities_.size() < this->number_levels_) {
@@ -99,25 +109,32 @@ class FlameLightEffect : public LightEffect {
       return;
     }
 
-    if (this->have_custom_colors_ && this->colors_.size() > 0) {
+    if (this->is_custom_color_set_needed_ && this->colors_.size() > 0) {
       // Setting the custom color is not in the start() because we
       // do not want to interrupt a running transformer.
 
-      this->have_custom_colors_ = false;  // Only set the initial color once.
+      this->is_custom_color_set_needed_ = false;  // Only set the initial color once.
 
       // Logging colors as integers because it is easier to take the numbers
       // to other tools (such as HTML color pickers) for comparison.
-      ESP_LOGD("FlameLightEffect", "Have a %d custom colors. Color @ idx 0:  R: %d  G: %d  B: %d  (W: %d)",
+      ESP_LOGD("FlameLightEffect", "Setting initial color to color @ idx 0:  R: %d  G: %d  B: %d  (W: %d)",
                this->colors_.size(), this->colors_[0].red, this->colors_[0].green, this->colors_[0].blue,
                this->colors_[0].white);
+
+      this->initial_brightness_ = 1.0f;
+      this->baseline_brightness_ = this->is_baseline_brightness_dim_ ? 1.0f - this->intensity_ : 1.0f;
+      this->color_mode_ = ColorMode::RGB;
+      set_min_max_brightness();
+      // We determined everything here so no need to get it again.
+      this->is_baseline_brightness_needed_ = false;
 
       auto call = this->state_->make_call();
       call.set_publish(false);
       call.set_save(false);
-      call.set_color_mode(ColorMode::RGB);
+      call.set_color_mode(this->color_mode_);
       // Commented out 'cause We will use the default transistion.
-      // call.set_transition_length(transition_length_ms * 4);
-      call.set_brightness(1.0f);
+      // call.set_transition_length(this->transition_length_ms_ * 4);
+      call.set_brightness(baseline_brightness_);
       call.set_rgb(this->colors_[0].red / 255.0f, this->colors_[0].green / 255.0f, this->colors_[0].blue / 255.0f);
       call.set_state(true);
       call.perform();
@@ -126,6 +143,7 @@ class FlameLightEffect : public LightEffect {
     }
 
     if (this->is_baseline_brightness_needed_) {
+      // This is only needed if we are not using a custom color.
       this->is_baseline_brightness_needed_ = false;
       this->initial_brightness_ = this->baseline_brightness_ = this->state_->current_values.get_brightness();
       this->color_mode_ = this->state_->current_values.get_color_mode();
@@ -157,8 +175,7 @@ class FlameLightEffect : public LightEffect {
     uint32_t transition_length_ms;
 
     if (this->flickers_left_ > 0) {
-      this->flickers_left_ -= 1;
-
+      // We decrement the counter below.
       if (this->probability_true(0.5f)) {
         transition_length_ms = this->transition_length_ms_;
       } else {
@@ -212,6 +229,7 @@ class FlameLightEffect : public LightEffect {
       transition_length_ms = this->transition_length_ms_;
     }
 
+    this->flickers_left_ -= 1;
     //   ESP_LOGD("FlameLightEffect", "Brightness: %.3f    Transition Length: %dms    Short Flickers Left: %d",
     //     new_brightness, transition_length_ms, flickers_left_);
     auto call = this->state_->make_call();
@@ -231,12 +249,14 @@ class FlameLightEffect : public LightEffect {
       }
 
       if (this->use_exponential_gradient_) {
-        color_fade_amount = std::pow(10.0f, color_fade_amount) / 10;
+        color_fade_amount = std::pow(10.0f, color_fade_amount) / 10.0f;
       }
 
-      Color c = this->colors_[0].gradient(this->colors_[1], color_fade_amount * 255);
-      ESP_LOGD("FlameLightEffect", "Color Fade: %.1f%%    R: %d    G: %d    B: %d", color_fade_amount * 100.0f, c.red,
-               c.green, c.blue);
+      uint8_t amt = color_fade_amount >= 1.0f ? 255 : color_fade_amount <= 0.0f ? 0 : (color_fade_amount * 255.0f);
+
+      Color c = this->colors_[0].gradient(this->colors_[1], amt);
+      ESP_LOGD("FlameLightEffect", "Color Fade: %.1f%% -> %d    R: %d    G: %d    B: %d", color_fade_amount * 100.0f, amt,
+        c.red, c.green, c.blue);
 
       call.set_rgb(c.red / 255.0f, c.green / 255.0f, c.blue / 255.0f);
     } else {
@@ -292,7 +312,7 @@ class FlameLightEffect : public LightEffect {
   void set_colors(const std::vector<Color> &colors) {
     if (colors.size() > 0) {
       this->colors_ = colors;
-      this->have_custom_colors_ = true;
+      this->is_custom_color_set_needed_ = true;
     }
   }
 
@@ -331,7 +351,7 @@ class FlameLightEffect : public LightEffect {
 
   float number_levels_ = 3.0f;
 
-  bool have_custom_colors_ = false;
+  bool is_custom_color_set_needed_ = false;
   std::vector<Color> colors_;
 
   bool is_baseline_brightness_dim_ = false;
