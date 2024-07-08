@@ -40,7 +40,6 @@ light:
       - candle:
           name: "Tealight - Calm Room"
           intensity: 10%
-          # flicker_intensity: 05%
           flicker_transition_length: 100
           flicker_level_probabilities:
             - probability: 30%
@@ -49,13 +48,100 @@ light:
 
       - candle:
           name: "Tealight - Breezy"
-          intensity: 10%
-          # flicker_intensity: 05%
+          intensity: 15%
           flicker_transition_length: 75
 
       - candle:
           name: "Candle - Calm"
           intensity: 10%
+
+      # A candle with the values specified the default values.
+      # and add in a two-color swing.
+      - candle:
+          name: "Candle with Defaults add Two Colors"
+          intensity: 15%
+          flicker_transition_length: 75
+          flicker_intensity: 2.5%
+          flicker_level_probabilities:
+            # Three probabilities, so three levels (plus level zero which is implied).
+            - probability: 50%
+            - probability: 30%
+            - probability: 8%
+          number_flickers_config:
+            # The first entry probability does not matter since
+            # it is the default. This will have the light flickering
+            # approximately 50% of the time.
+            - number_flickers: 2
+            - probability: 40%
+              number_flickers: 4
+            - probability: 20%
+              number_flickers: 8
+            - probability: 10%
+              number_flickers: 10
+            # When we get to level three, we want only
+            # a single flicker.
+            - force_at_level: 3
+              number_flickers: 1
+          colors:
+            - red: 100%
+              green: 56%
+              blue: 24%
+            - red: 100%
+              green: 50%
+              blue: 0%
+          use_exponential_gradient: true
+
+      # A fireplace with most of the default values specified and
+      # add a color per level.
+      - fireplace:
+          name: "Fireplace with Defaults add Level Colors"
+          intensity: 21%
+          flicker_transition_length: 150
+          flicker_intensity: 3.5%
+          # The probabilities and flicker count config are the
+          # same for the default candle example, so they are
+          # excluded for brevity.
+          colors:
+              # Level 0
+            - red: 100%
+              green: 50%
+              blue: 0%
+              # Level 1
+            - red: 100%
+              green: 50%
+              blue: 7%
+              # Level 2
+            - red: 100%
+              green: 58%
+              blue: 8%
+              # Level 3
+            - red: 100%
+              green: 66%
+              blue: 22%
+
+      # Undulating Ooze
+      - fireplace:
+          name: "Lava"
+          intensity: 21%
+          flicker_transition_length: 500
+          flicker_intensity: 3%
+          number_flickers_config:
+            - number_flickers: 2
+            - number_flickers: 3
+            - force_at_level: 3
+              number_flickers: 1
+          colors:
+            - red: 100%
+              green: 0%
+              blue: 0%
+            - red: 100%
+              green: 35%
+              blue: 0%
+          use_exponential_gradient: false
+          flicker_level_probabilities:
+            - probability: 50%
+            - probability: 30%
+            - probability: 10%
 
       - candle:
           name: "Candle Test Breezy 50ms"
@@ -152,7 +238,7 @@ light:
             - red: 100%
               green: 66%
               blue: 22%
-          flicker_config:
+          number_flickers_config:
             - probability: 40%
               number_flickers: 2
             - probability: 30%
